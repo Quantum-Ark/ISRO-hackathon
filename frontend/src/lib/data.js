@@ -1,0 +1,224 @@
+import { useState, useEffect } from 'react';
+
+// Static configurations and helpers
+export const transferLearning = {
+  source: 'GOES XRS (1996-2024)',
+  target: 'Aditya-L1 SoLEXS/HEL1OS (2024-)',
+  fineTuneSamples: 142,
+  pretrainEpochs: 200,
+  finetuneEpochs: 50,
+  domainAdaptation: 'Feature-level MMD',
+  validationSplit: 0.2,
+};
+
+export function formatUTC(date) {
+  if (!date || date === '—') return '—';
+  try {
+    return new Date(date).toISOString().replace('T', ' ').slice(0, 19);
+  } catch (e) {
+    return date;
+  }
+}
+
+export function fmtFlux(v) {
+  if (v === undefined || v === null) return '—';
+  if (v >= 1e-4) return `${(v * 1e4).toFixed(1)}e-4`;
+  if (v >= 1e-5) return `${(v * 1e5).toFixed(1)}e-5`;
+  if (v >= 1e-6) return `${(v * 1e6).toFixed(1)}e-6`;
+  if (v >= 1e-7) return `${(v * 1e7).toFixed(1)}e-7`;
+  return v.toExponential(1);
+}
+
+export function fmtPct(v) {
+  return `${(v * 100).toFixed(0)}%`;
+}
+
+// ------------------------------------------
+// Centralized React-reactive Live Store
+// ------------------------------------------
+let state = {
+  fluxData: [],
+  systemStatus: {
+    state: 'QUIET',
+    stateLabel: 'Quiet Sun',
+    stateColor: '#2ECC71',
+    since: '—',
+    pipeline: 'Initializing...',
+    dataLatency: '—',
+    lastSync: '—',
+    pradanSync: 'Healthy',
+    goesSync: 'Healthy',
+    modelVersion: 'v2.1.3'
+  },
+  nowcast: {
+    class: '—',
+    peakFlux: 5.0e-8,
+    onset: '—',
+    peakTime: '—',
+    currentPhase: 'Quiet Sun',
+    adaptiveThreshold: 3.0,
+    rollingMAD: 2.8e-8,
+    zScore: 0.0,
+    confidence: 0.98
+  },
+  forecast: {
+    probability: 12,
+    updatedAt: '—',
+    windowStart: '—',
+    windowEnd: '—',
+    nextClass: 'C-class',
+    leadTime: 0,
+    tcnConfidence: 0.12
+  },
+  hardnessRatio: {
+    current: 0.035,
+    baseline: 0.035,
+    threshold: 0.06,
+    trend: 'stable',
+    preFlareSignal: false,
+    minutesEarly: 0
+  },
+  alerts: []
+};
+
+const listeners = new Set();
+
+function updateState(nextFields) {
+  state = { ...state, ...nextFields };
+  listeners.forEach(l => l(state));
+}
+
+export function getState() {
+  return state;
+}
+
+export function subscribe(l) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+
+export function useLiveState() {
+  const [liveData, setLiveData] = useState(state);
+  
+  useEffect(() => {
+    setLiveData(state);
+    return subscribe(setLiveData);
+  }, []);
+  
+  return liveData;
+}
+
+// ------------------------------------------
+// WebSocket and REST Ingestion Client
+// ------------------------------------------
+let ws = null;
+let reconnectTimer = null;
+
+const API_HTTP_HOST = `http://${window.location.hostname}:8000`;
+const API_WS_HOST = `ws://${window.location.hostname}:8000`;
+
+export function initWebSocketConnection() {
+  // Fetch initial timeseries history via REST
+  fetch(`${API_HTTP_HOST}/api/timeseries?hours=6`)
+    .then(r => r.json())
+    .then(points => {
+      updateState({ fluxData: points });
+    })
+    .catch(err => {
+      console.warn("Failed to load timeseries from API server. Falling back to empty chart.", err);
+    });
+
+  // Connect WebSocket
+  connectWS();
+}
+
+function connectWS() {
+  if (ws) {
+    try {
+      ws.close();
+    } catch(e) {}
+  }
+  
+  console.log("Connecting to WebSocket:", `${API_WS_HOST}/ws/live`);
+  ws = new WebSocket(`${API_WS_HOST}/ws/live`);
+  
+  ws.onopen = () => {
+    console.log("WebSocket connection established with Helios-Cortex server.");
+    updateState({
+      systemStatus: {
+        ...state.systemStatus,
+        pipeline: 'Operational',
+        dataLatency: '1.2s'
+      }
+    });
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+  };
+  
+  ws.onmessage = (event) => {
+    try {
+      const data = jsonParse(event.data);
+      if (data) {
+        // Update variables from websocket broadcast
+        const nextFlux = [...state.fluxData];
+        
+        // Append point to local rolling fluxData array
+        const ts_ms = Date.now();
+        nextFlux.push({
+          timestamp: ts_ms,
+          softFlux: data.nowcast.peakFlux,
+          hardFlux: data.hardnessRatio.current * (data.nowcast.peakFlux * 1e8) * 1.5e-8,
+          hardnessRatio: data.hardnessRatio.current
+        });
+        
+        // Keep last 1000 points
+        if (nextFlux.length > 1000) {
+          nextFlux.shift();
+        }
+        
+        updateState({
+          fluxData: nextFlux,
+          systemStatus: data.systemStatus,
+          nowcast: data.nowcast,
+          forecast: data.forecast,
+          hardnessRatio: data.hardnessRatio,
+          alerts: data.alerts
+        });
+      }
+    } catch (e) {
+      console.error("Error processing websocket frame:", e);
+    }
+  };
+  
+  ws.onclose = () => {
+    console.warn("WebSocket disconnected from Helios-Cortex server. Retrying in 5s...");
+    updateState({
+      systemStatus: {
+        ...state.systemStatus,
+        pipeline: 'Disconnected (Offline)',
+        dataLatency: '—'
+      }
+    });
+    
+    if (!reconnectTimer) {
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectWS();
+      }, 5000);
+    }
+  };
+  
+  ws.onerror = (err) => {
+    console.error("WebSocket connection encountered an error:", err);
+  };
+}
+
+function jsonParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+}
