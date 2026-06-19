@@ -48,4 +48,6 @@ data/processed/backtest_results.json
 
 # Markdown files
 *.md
+!README.md
 **/*.md
+!**/README.md
