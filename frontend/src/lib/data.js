@@ -47,7 +47,7 @@ let state = {
     dataLatency: '—',
     lastSync: '—',
     pradanSync: 'Healthy',
-    goesSync: 'Healthy',
+    al1Sync: 'Healthy',
     modelVersion: 'v2.1.3'
   },
   nowcast: {

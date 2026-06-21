@@ -10,7 +10,7 @@ class SystemStatusModel(BaseModel):
     dataLatency: str
     lastSync: str
     pradanSync: str
-    goesSync: str
+    al1Sync: str
     modelVersion: str
 
 class NowcastModel(BaseModel):

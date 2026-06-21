@@ -12,13 +12,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Robust imports for optional libraries
 try:
     import pandas as pd
-    from pipeline.ingestion import load_solexs_fits, load_helios_fits, align_telemetry
-    PANDAS_ASTROPY_OK = True
+    PANDAS_OK = True
 except ImportError:
-    PANDAS_ASTROPY_OK = False
-    print("Note: pandas/astropy not loaded. Running in pure-Python simulation mode.")
+    PANDAS_OK = False
 
-from pipeline.ingestion import generate_live_stream_point, load_and_align
+from pipeline.ingestion import generate_live_stream_point, load_and_align, load_aditya_data
 from pipeline.features import compute_latest_features, compute_latest_features_pure
 from pipeline.nowcast import nowcast_predict
 from pipeline.forecast import forecast_predict
@@ -91,7 +89,7 @@ def fetch_latest_noaa_tick(last_time_tag=None):
 
 def main():
     parser = argparse.ArgumentParser(description="HELIOS-CORTEX Pipeline Orchestrator")
-    parser.add_argument("--mode", type=str, default="live", choices=["live", "replay"], help="Run mode")
+    parser.add_argument("--mode", type=str, default="live", choices=["live", "replay", "aditya"], help="Run mode")
     parser.add_argument("--event", type=int, default=6, help="Event ID for replay")
     parser.add_argument("--speed", type=float, default=1.0, help="Simulation speed multiplier")
     parser.add_argument("--api-url", type=str, default="http://localhost:8000/api/update", help="FastAPI update endpoint")
@@ -124,8 +122,21 @@ def main():
             except Exception as e:
                 print(f"Error loading replay data: {e}. Falling back to simulation.")
                 
+    # ADITYA mode: load real Aditya-L1 PRADAN data
+    if args.mode == "aditya":
+        print("Loading real Aditya-L1 data from PRADAN archive...")
+        try:
+            aditya_data = load_aditya_data(sample_every=60)
+            if aditya_data and len(aditya_data) > 10:
+                replay_records = aditya_data
+                print(f"Loaded {len(replay_records)} real Aditya-L1 records from PRADAN!")
+            else:
+                print("Aditya-L1 data empty or not found.")
+        except Exception as e:
+            print(f"Error loading Aditya-L1 data: {e}")
+                
     # Fallback simulation if replay data empty
-    if args.mode == "replay" and not replay_records:
+    if args.mode in ("replay", "aditya") and not replay_records:
         print("Simulating replay stream for Event ID", args.event)
         duration_ticks = 720
         base_time = time.time()
@@ -185,7 +196,46 @@ def main():
                 history_buffer.pop(0)
                 
             # 2. Compute features
-            if PANDAS_ASTROPY_OK:
+            # ADITYA mode: use the pre-loaded records
+            if args.mode == "aditya" and replay_records:
+                if replay_idx >= len(replay_records):
+                    print("Aditya replay completed. Restarting...")
+                    replay_idx = 0
+                telemetry = replay_records[replay_idx]
+                replay_idx += 1
+                t_sec = telemetry['time']
+            else:
+                t_sec = time.time()
+                # Try fetching live NOAA data
+                new_telemetry, latest_noaa_tag = fetch_latest_noaa_tick(last_noaa_tag)
+                if new_telemetry:
+                    last_noaa_tag = latest_noaa_tag
+                    last_known_noaa = new_telemetry
+                    print(f"[NOAA SYNC] Fetched latest NOAA X-ray tick: {last_noaa_tag}")
+                
+                if last_known_noaa:
+                    # Stream last known NOAA data with current time & small dynamic fluctuation
+                    telemetry = last_known_noaa.copy()
+                    telemetry['time'] = int(t_sec)
+                    fluct_soft = random.gauss(0, telemetry['soft_flux'] * 0.01)
+                    fluct_hard = random.gauss(0, telemetry['hard_25_50'] * 0.01)
+                    telemetry['soft_flux'] = max(1e-9, telemetry['soft_flux'] + fluct_soft)
+                    telemetry['hard_25_50'] = max(0.1, telemetry['hard_25_50'] + fluct_hard)
+                    telemetry['hard_15_25'] = telemetry['hard_25_50'] * 2.2
+                    telemetry['hard_50_100'] = telemetry['hard_25_50'] * 0.12
+                else:
+                    # Offline/initial fallback: simulated active flare cycle
+                    flare_active = (live_tick % 180) > 60 and (live_tick % 180) < 120
+                    telemetry = generate_live_stream_point(t_sec, flare_active=flare_active)
+                    live_tick += 1
+                
+            # Append to history
+            history_buffer.append(telemetry)
+            if len(history_buffer) > 2000:
+                history_buffer.pop(0)
+                
+            # 2. Compute features
+            if PANDAS_OK:
                 buf_df = pd.DataFrame(history_buffer)
                 features = compute_latest_features(buf_df).tolist()
             else:

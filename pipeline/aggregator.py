@@ -141,7 +141,7 @@ class AlertAggregator:
             'dataLatency': '1.2s',
             'lastSync': timestamp_utc,
             'pradanSync': 'Healthy',
-            'goesSync': 'Healthy',
+            'al1Sync': 'Healthy',
             'modelVersion': 'v2.1.3'
         }
         

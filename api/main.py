@@ -74,44 +74,7 @@ def init_history():
     global _timeseries_history, _latest_status, _alerts_history
     print("Pre-populating historical data...")
     
-    noaa_points = get_noaa_goes_history()
-    if noaa_points:
-        print(f"Successfully loaded {len(noaa_points)} live points from NOAA GOES satellite API!")
-        for ts_ms, soft, hard in noaa_points:
-            hard_proxy = hard * 3.0e9
-            hr = (hard_proxy / max(0.1, soft * 1e8)) * 0.035
-            hr = max(0.0, min(0.5, hr))
-            
-            _timeseries_history.append({
-                'timestamp': ts_ms,
-                'softFlux': soft,
-                'hardFlux': hard,
-                'hardnessRatio': hr
-            })
-    else:
-        print("NOAA offline or error. Falling back to quiet-sun simulation...")
-        base_time = int(datetime.utcnow().timestamp()) - 21600 # 6 hours ago
-        
-        # Generate 6 hours of baseline quiet sun telemetry (1 point per 20 seconds)
-        np_state = 1337
-        for i in range(1080):
-            t = base_time + i * 20
-            # Seeded pseudo-random generation for realistic quiet sun noise
-            np_state = (np_state * 1103515245 + 12345) & 0x7fffffff
-            val = (np_state % 1000) / 1000.0
-            
-            soft = 5e-8 + val * 2e-8
-            hard = 3.0 + val * 0.5
-            hr = (hard / (soft * 1e8)) * 0.035
-            
-            _timeseries_history.append({
-                'timestamp': t * 1000, # to ms
-                'softFlux': soft,
-                'hardFlux': hard * 1.5e-8, # scaled for chart
-                'hardnessRatio': hr
-            })
-        
-    # Set default starting status
+    # Set default status immediately so API responds right away
     ts_str = datetime.utcnow().isoformat() + "Z"
     _latest_status = {
         'systemStatus': {
@@ -123,7 +86,7 @@ def init_history():
             'dataLatency': '1.2s',
             'lastSync': ts_str,
             'pradanSync': 'Healthy',
-            'goesSync': 'Healthy',
+            'al1Sync': 'Healthy',
             'modelVersion': 'v2.1.3'
         },
         'nowcast': {
@@ -155,10 +118,79 @@ def init_history():
             'minutesEarly': 0
         },
         'alerts': [
-            { 'ts': ts_str, 'type': 'INFO', 'level': 'GREEN', 'msg': 'HELIOS-CORTEX pipeline online' }
+            { 'ts': ts_str, 'type': 'INFO', 'level': 'GREEN', 'msg': 'HELIOS-CORTEX pipeline online (Aditya-L1 PRADAN)' }
         ]
     }
     _alerts_history = _latest_status['alerts']
+    
+    # Try loading real Aditya-L1 data (with heavy sampling for speed)
+    try:
+        import sys
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from pipeline.ingestion import load_aditya_data
+        
+        aditya_data = load_aditya_data(sample_every=30)
+        if aditya_data and len(aditya_data) > 10:
+            print(f"Successfully loaded {len(aditya_data)} sampled points from real Aditya-L1 PRADAN data!")
+            # Offset timestamps to appear recent (shift to start ~3 hours ago)
+            now_ms = int(datetime.utcnow().timestamp() * 1000)
+            data_start_ms = aditya_data[0]['time'] * 1000
+            data_end_ms = aditya_data[-1]['time'] * 1000
+            span_ms = data_end_ms - data_start_ms
+            offset = (now_ms - span_ms - 3600000) - data_start_ms  # Start 1h ago
+            
+            for r in aditya_data[::2]:  # Further thin to 60s cadence
+                ts_ms = r['time'] * 1000 + offset
+                soft = r['soft_flux']
+                hard = r['hard_25_50']
+                hr = (hard / max(0.1, soft * 1e8)) * 0.035
+                hr = max(0.0, min(0.5, hr))
+                _timeseries_history.append({
+                    'timestamp': int(ts_ms),
+                    'softFlux': soft,
+                    'hardFlux': hard * 1.5e-8,
+                    'hardnessRatio': hr
+                })
+            print(f"  Pre-populated {len(_timeseries_history)} timeseries points from Aditya-L1 (shifted to recent).")
+            return
+    except Exception as e:
+        print(f"Could not load Aditya-L1 data: {e}")
+    
+    # Fallback: try NOAA GOES API
+    print("Trying NOAA GOES API as fallback...")
+    noaa_points = get_noaa_goes_history()
+    if noaa_points:
+        print(f"Loaded {len(noaa_points)} live points from NOAA GOES!")
+        for ts_ms, soft, hard in noaa_points:
+            hard_proxy = hard * 3.0e9
+            hr = (hard_proxy / max(0.1, soft * 1e8)) * 0.035
+            hr = max(0.0, min(0.5, hr))
+            _timeseries_history.append({
+                'timestamp': ts_ms,
+                'softFlux': soft,
+                'hardFlux': hard,
+                'hardnessRatio': hr
+            })
+        return
+    
+    # Final fallback: simulated data
+    print("NOAA unavailable. Using simulated baseline...")
+    base_time = int(datetime.utcnow().timestamp()) - 21600
+    np_state = 1337
+    for i in range(1080):
+        t = base_time + i * 20
+        np_state = (np_state * 1103515245 + 12345) & 0x7fffffff
+        val = (np_state % 1000) / 1000.0
+        soft = 5e-8 + val * 2e-8
+        hard = 3.0 + val * 0.5
+        hr = (hard / (soft * 1e8)) * 0.035
+        _timeseries_history.append({
+            'timestamp': t * 1000,
+            'softFlux': soft,
+            'hardFlux': hard * 1.5e-8,
+            'hardnessRatio': hr
+        })
+    print(f"  Simulated {len(_timeseries_history)} baseline points.")
 
 @app.on_event("startup")
 async def startup_event():
@@ -290,7 +322,7 @@ def get_replay_event(event_id: int):
                     'dataLatency': '0.9s',
                     'lastSync': datetime.fromtimestamp(t_sec).isoformat() + "Z",
                     'pradanSync': 'Healthy',
-                    'goesSync': 'Healthy',
+                    'al1Sync': 'Healthy',
                     'modelVersion': 'v2.1.3'
                 },
                 'nowcast': {
