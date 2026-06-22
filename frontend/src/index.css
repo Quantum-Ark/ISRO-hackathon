@@ -9,18 +9,18 @@
 
 /* ---------- CSS Variables ---------- */
 :root {
-  --bg-primary: #0A0E14;
-  --bg-surface: #11161D;
-  --bg-elevated: #181E27;
-  --bg-glass: rgba(22, 27, 34, 0.6);
-  --bg-glass-heavy: rgba(13, 17, 23, 0.8);
-  --border: #28303D;
-  --border-light: #1E2632;
-  --text-primary: #D4DCE6;
-  --text-secondary: #8895A8;
-  --text-muted: #566176;
-  --accent: #E67E22;
-  --accent-dim: #B85E15;
+  --bg-primary: #000000;
+  --bg-surface: #0A0A0A;
+  --bg-elevated: #121212;
+  --bg-glass: rgba(0, 0, 0, 0.4);
+  --bg-glass-heavy: rgba(0, 0, 0, 0.7);
+  --border: rgba(255, 255, 255, 0.15);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --text-primary: #FFFFFF;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --accent: #FFFFFF;
+  --accent-dim: #E5E7EB;
   --green: #2ECC71;
   --green-dim: #1A8C4A;
   --yellow: #F1C40F;
@@ -33,7 +33,7 @@
   --soft-xray: #E67E22;
   --hard-xray: #3498DB;
   --font-mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-  --font-sans: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -59,7 +59,9 @@ body {
   height: 100%;
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-size: 13px;
   line-height: 1.5;
   overflow: hidden;
@@ -326,7 +328,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   left: 0;
   width: 8px;
   height: 8px;
-  background: #E67E22;
+  background: #FFFFFF;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
@@ -340,7 +342,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   left: 0;
   width: 40px;
   height: 40px;
-  border: 1.5px solid rgba(230, 126, 34, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
@@ -367,7 +369,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 /* Root */
 .landing-root {
   position: relative;
-  background: #05080C;
+  background: #000000;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -817,7 +819,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-mono);
-  color: #E67E22;
+  color: #FFFFFF;
 }
 
 /* ── Workflow (How It Works) ── */
@@ -827,6 +829,13 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   gap: 0;
   max-width: 680px;
   margin: 0 auto;
+  transition: max-width 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .workflow {
+    max-width: 900px;
+  }
 }
 
 .workflow-step-wrapper {
@@ -842,6 +851,13 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   padding: 24px 0;
 }
 
+@media (min-width: 768px) {
+  .workflow-step {
+    gap: 40px;
+    align-items: center;
+  }
+}
+
 .workflow-step-icon {
   flex-shrink: 0;
   width: 44px;
@@ -850,8 +866,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: rgba(230, 126, 34, 0.08);
-  border: 1px solid rgba(230, 126, 34, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .workflow-step-content {
@@ -884,6 +900,32 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-family: var(--font-sans);
 }
 
+.workflow-step-visual {
+  flex-shrink: 0;
+  width: 240px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 767px) {
+  .workflow-step {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .workflow-step-visual {
+    width: 100%;
+    margin-top: 14px;
+  }
+}
+
 /* Animated connector line */
 .workflow-line {
   width: 2px;
@@ -895,10 +937,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 
 .workflow-line-fill {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(180deg, #E67E22, rgba(230, 126, 34, 0.2));
-  transition: width 1s cubic-bezier(0.23, 1, 0.32, 1);
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(180deg, #FFFFFF, rgba(255, 255, 255, 0.2));
+  transition: height 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /* ── Demo Preview ── */
@@ -937,7 +979,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .demo-logo-dot {
   width: 6px;
   height: 6px;
-  background: #E67E22;
+  background: #FFFFFF;
   border-radius: 50%;
 }
 
@@ -958,8 +1000,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 
 .demo-tab.active {
-  background: rgba(230, 126, 34, 0.1);
-  color: #E67E22;}
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;}
 
 .demo-tab:hover:not(.active) {
   color: #8895A8;
@@ -1068,7 +1110,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 
 .demo-card-value.green { color: #2ECC71; }
-.demo-card-value.orange { color: #E67E22; }
+.demo-card-value.orange { color: #FFFFFF; }
 
 /* Demo steps */
 .demo-steps {
@@ -1093,8 +1135,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(230, 126, 34, 0.1);
-  border: 1px solid rgba(230, 126, 34, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   font-size: 11px;
   font-weight: 700;
   color: #E67E22;
@@ -1130,7 +1172,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: 10px;
   font-weight: 700;
   font-family: var(--font-mono);
-  color: #E67E22;
+  color: #FFFFFF;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 14px;
@@ -1159,7 +1201,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(230, 126, 34, 0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Getting Started (Usage) ── */
@@ -1180,7 +1222,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   font-size: 28px;
   font-weight: 800;
   font-family: var(--font-mono);
-  color: rgba(230, 126, 34, 0.15);
+  color: rgba(255, 255, 255, 0.15);
   margin-bottom: 8px;
   padding: 16px 20px 0;
 }
@@ -1333,5 +1375,73 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   .landing-footer { flex-direction: column; gap: 8px; text-align: center; }
   .landing-hero-stats { flex-wrap: wrap; gap: 12px; }
   .hero-stat-divider { display: none; }
+}
+
+.liquid-glass {
+  background: rgba(0, 0, 0, 0.4);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.1) 80%, rgba(255,255,255,0.3) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Connect sections to fixed background video */
+.landing-root video {
+  position: fixed !important;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Make hero container transparent to let fixed video show through */
+.landing-root > div:first-of-type {
+  background-color: transparent !important;
+}
+
+/* Style rest of sections to scroll over the video with glassmorphic dimming */
+.landing-section {
+  position: relative;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Improve readability of cards floating over the video */
+.tilt-card, .stack-col, .cta-block {
+  background: rgba(10, 10, 10, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.demo-mockup {
+  background: rgba(10, 10, 10, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
