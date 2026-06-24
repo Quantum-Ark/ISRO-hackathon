@@ -108,9 +108,9 @@ h3 { font-size: clamp(11px, 1.1vw, 12px); font-weight: 700; letter-spacing: 0.06
 
 .header-nav { display: none; align-items: center; gap: 4px; padding: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 @media (min-width: 768px) { .header-nav { display: flex; } }
-.nav-pill { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border: none; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer; transition: color 0.25s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; position: relative; z-index: 1; }
-.nav-pill:hover { color: var(--text-secondary); }
-.nav-pill-active { color: #FFFFFF !important; background: transparent !important; box-shadow: none !important; }
+.nav-pill { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border: none; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer; transition: color 0.25s cubic-bezier(0.4,0,0.2,1), text-shadow 0.25s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; position: relative; z-index: 1; }
+.nav-pill:hover { color: #FFFFFF; text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.4); }
+.nav-pill-active { color: #FFFFFF !important; background: transparent !important; box-shadow: none !important; text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }
 .nav-pill-icon { font-size: 11px; }
 .nav-pill-label { letter-spacing: 0.02em; }
 
@@ -172,7 +172,6 @@ h3 { font-size: clamp(11px, 1.1vw, 12px); font-weight: 700; letter-spacing: 0.06
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 0.18),
     0 20px 56px rgba(0, 0, 0, 0.65);
-  transform: translateY(-4px);
 }
 
 /* Inner sub-cards — same liquid-glass effect but thinner border */
@@ -310,7 +309,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
 /* Hover-float micro-animation — premium 3D lift */
 .hover-float { transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.4s; }
-.hover-float:hover { transform: perspective(800px) translateY(-4px) scale3d(1.01, 1.01, 1.01); box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 14px 34px rgba(0,0,0,0.45); }
+.hover-float:hover { box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 14px 34px rgba(0,0,0,0.45); }
 
 /* ============= PREMIUM DASHBOARD STYLES (Landing-level) ============= */
 
@@ -704,7 +703,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 
 .section-tag {
-  display: inline-block;
+  display: none;
   font-size: 10px;
   font-weight: 700;
   font-family: var(--font-mono);
@@ -819,22 +818,25 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   align-items: center;
   gap: 8px;
   padding: 13px 30px;
-  background: #E67E22;
-  border: none;
+  background: #ffffff !important;
+  border: none !important;
   border-radius: 8px;
-  color: #fff;
+  color: #000000 !important;
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   letter-spacing: 0.01em;
   text-decoration: none;
-  will-change: transform;
 }
 
 .landing-btn-primary:hover {
-  box-shadow: 0 4px 24px rgba(230, 126, 34, 0.25);
+  background: #f3f4f6 !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.15);
 }
 
 .landing-btn-primary.entering {
@@ -846,23 +848,44 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   display: inline-flex;
   align-items: center;
   padding: 13px 24px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: #8895A8;
+  color: #fff;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  will-change: transform;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transition: color 0.4s ease, border-color 0.4s ease;
+}
+
+.landing-btn-ghost::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .landing-btn-ghost:hover {
-  background: rgba(255,255,255,0.04);
-  color: #D4DCE6;
-  border-color: rgba(255,255,255,0.15);
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.landing-btn-ghost:hover::before {
+  transform: scaleX(1);
 }
 
 /* Hero stats */
@@ -992,6 +1015,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 
 .feature-tag {
+  display: none;
   font-size: 10px;
   font-weight: 700;
   font-family: var(--font-mono);
@@ -1625,10 +1649,29 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .landing-section {
   position: relative;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.65) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 24px !important;
+  margin: 32px auto !important;
+  overflow: hidden !important;
+}
+
+.landing-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.12) 80%, rgba(255,255,255,0.35) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Improve readability of cards floating over the video */

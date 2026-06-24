@@ -58,7 +58,7 @@ export default function App() {
 
       {/* Main app shell */}
       <div className="app-shell">
-        <Header view={activeTab} onView={handleView} time={time} />
+        <Header view={activeTab} onView={handleView} time={time} onLogoClick={() => setShowLanding(true)} />
         <div className={`flex-1 overflow-auto ${transitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'} transition-all duration-200 ease-out`}>
           {mainContent}
         </div>

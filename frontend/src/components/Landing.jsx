@@ -2,35 +2,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 
 
-// ── Magnetic Button ────────────────────────────────────────────
+// ── Landing Page CTA Button ────────────────────────────────────
 function MagneticBtn({ children, className, onClick, href, ...props }) {
-  const ref = useRef(null);
-
-  const handleMove = useCallback((e) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = (e.clientX - cx) * 0.3;
-    const dy = (e.clientY - cy) * 0.3;
-    el.style.transform = `translate(${dx}px, ${dy}px)`;
-  }, []);
-
-  const handleLeave = useCallback(() => {
-    if (ref.current) ref.current.style.transform = 'translate(0, 0)';
-  }, []);
-
   const Tag = href ? 'a' : 'button';
   const extra = href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {};
 
   return (
     <Tag
-      ref={ref}
       className={className}
       onClick={onClick}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
       {...extra}
       {...props}
     >
@@ -1170,10 +1150,6 @@ export default function Landing({ onEnter }) {
             <div className="landing-ctas cta-buttons">
               <MagneticBtn className={`landing-btn-primary ${entering ? 'entering' : ''}`} onClick={handleEnter}>
                 Launch Dashboard
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
               </MagneticBtn>
               <MagneticBtn className="landing-btn-ghost" href="https://www.isro.gov.in">
                 ISRO →

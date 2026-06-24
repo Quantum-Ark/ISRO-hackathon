@@ -8,33 +8,7 @@ const NAV_ITEMS = [
   { key: 'metrics', label: 'Metrics', icon: '◈' },
 ];
 
-function MagneticNavBtn({ children, className, onClick, btnRef }) {
-  const localRef = useRef(null);
-  const mergedRef = useCallback((el) => {
-    localRef.current = el;
-    if (typeof btnRef === 'function') btnRef(el);
-  }, [btnRef]);
-
-  const handleMove = useCallback((e) => {
-    const el = localRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const dx = (e.clientX - rect.left - rect.width / 2) * 0.2;
-    const dy = (e.clientY - rect.top - rect.height / 2) * 0.2;
-    el.style.transform = `translate(${dx}px, ${dy}px)`;
-  }, []);
-  const handleLeave = useCallback(() => {
-    if (localRef.current) localRef.current.style.transform = 'translate(0, 0)';
-  }, []);
-
-  return (
-    <button ref={mergedRef} className={className} onClick={onClick} onMouseMove={handleMove} onMouseLeave={handleLeave}>
-      {children}
-    </button>
-  );
-}
-
-export default function Header({ view, onView, time }) {
+export default function Header({ view, onView, time, onLogoClick }) {
   const { systemStatus } = useLiveState();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isOnline = systemStatus.pipeline !== 'Disconnected (Offline)';
@@ -74,7 +48,7 @@ export default function Header({ view, onView, time }) {
     <header className="app-header">
       <div className="header-inner">
         {/* Left: Branding */}
-        <div className="header-brand">
+        <div className="header-brand" onClick={onLogoClick} style={{ cursor: 'pointer', userSelect: 'none' }}>
           <div className="brand-text">
             <span className="brand-name">SOLFLARE</span>
             <span className="brand-sub">Aditya-L1</span>
@@ -100,15 +74,15 @@ export default function Header({ view, onView, time }) {
             }}
           />
           {NAV_ITEMS.map(({ key, label, icon }) => (
-            <MagneticNavBtn
+            <button
               key={key}
               onClick={() => handleView(key)}
               className={`nav-pill ${view === key ? 'nav-pill-active' : ''}`}
-              btnRef={(el) => { btnRefs.current[key] = el; }}
+              ref={(el) => { btnRefs.current[key] = el; }}
             >
               <span className="nav-pill-icon">{icon}</span>
               <span className="nav-pill-label">{label}</span>
-            </MagneticNavBtn>
+            </button>
           ))}
         </nav>
 
