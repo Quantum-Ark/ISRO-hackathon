@@ -1,47 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// ── Custom Cursor with 3D depth ────────────────────────────────
-function CustomCursor() {
-  const dotRef = useRef(null);
-  const ringRef = useRef(null);
-  const pos = useRef({ x: -100, y: -100 });
-  const ring = useRef({ x: -100, y: -100 });
 
-  useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-
-    const onMove = (e) => {
-      pos.current = { x: e.clientX, y: e.clientY };
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-      }
-    };
-
-    let animId;
-    const tick = () => {
-      ring.current.x += (pos.current.x - ring.current.x) * 0.12;
-      ring.current.y += (pos.current.y - ring.current.y) * 0.12;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${ring.current.x - 20}px, ${ring.current.y - 20}px)`;
-      }
-      animId = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener('mousemove', onMove);
-    animId = requestAnimationFrame(tick);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={dotRef} className="cursor-dot" />
-      <div ref={ringRef} className="cursor-ring" />
-    </>
-  );
-}
 
 // ── Magnetic Button ────────────────────────────────────────────
 function MagneticBtn({ children, className, onClick, href, ...props }) {
@@ -864,7 +823,6 @@ export default function Landing({ onEnter }) {
 
   return (
     <div className="landing-root">
-      <CustomCursor />
 
       {/* ── Video Background Hero Section ── */}
       <div className="relative h-screen w-full overflow-hidden flex flex-col bg-black text-white">

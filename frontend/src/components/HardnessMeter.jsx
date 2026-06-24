@@ -73,17 +73,15 @@ export default function HardnessMeter({ data, fluxData }) {
 
   return (
     <div 
-      className="glass-card h-full flex flex-col relative group"
+      className="h-full flex flex-col relative"
       style={{ overflow: 'hidden' }}
     >
       {/* Header */}
-      <div className="px-3 sm:px-4 py-2 border-b border-[rgba(255,255,255,0.05)] flex flex-wrap items-center justify-between bg-[#0D1117]/30 select-none gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-1 h-4 rounded-full bg-gradient-to-b from-[#F85149] to-[#D29922]" />
-          <h2 className="text-[10px] sm:text-xs uppercase font-mono tracking-wider font-semibold text-[#8B949E] truncate">
-            Spectral Hardness
-          </h2>
-          <span className="text-[7px] sm:text-[9px] text-[#484F58] font-mono hidden sm:inline">Pre-flare signal</span>
+      <div className="dash-card-header">
+        <div className="dash-card-header-left">
+          <div className="dash-card-bar" style={{ background: 'linear-gradient(180deg, #F87171, #FBBF24)' }} />
+          <span className="dash-card-title">Spectral Hardness</span>
+          <span className="dash-card-sub">Pre-flare signal</span>
         </div>
         
         {/* Real-time values */}
@@ -106,7 +104,7 @@ export default function HardnessMeter({ data, fluxData }) {
       </div>
 
       {/* SVG */}
-      <div ref={containerRef} className="p-2 sm:p-3 flex-1 overflow-hidden relative">
+      <div ref={containerRef} className="dash-card-body flex-1 overflow-hidden relative">
         <svg viewBox={`0 0 ${cw} ${ch}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">

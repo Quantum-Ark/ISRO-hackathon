@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Dict, Any, Optional
 
 class SystemStatusModel(BaseModel):
@@ -14,7 +14,10 @@ class SystemStatusModel(BaseModel):
     modelVersion: str
 
 class NowcastModel(BaseModel):
-    class_: str  # mapped from 'class'
+    # 'class' is a Python reserved word; accept the JSON key "class" via alias.
+    model_config = ConfigDict(populate_by_name=True)
+    class_: str = Field(alias="class")
+
     peakFlux: float
     onset: str
     peakTime: str
@@ -23,9 +26,6 @@ class NowcastModel(BaseModel):
     rollingMAD: float
     zScore: float
     confidence: float
-
-    class Config:
-        fields = {'class_': 'class'}
 
 class ForecastModel(BaseModel):
     probability: int
@@ -45,19 +45,18 @@ class HardnessRatioModel(BaseModel):
     minutesEarly: int
 
 class AlertModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
     ts: str
     type: str
     level: str
     msg: str
-    class_: Optional[str] = None
+    # The aggregator emits "Class" (capital C); accept both spellings via alias.
+    class_: Optional[str] = Field(default=None, alias="Class")
     prob: Optional[int] = None
     hr: Optional[float] = None
     derivative: Optional[str] = None
     latency: Optional[str] = None
     model: Optional[str] = None
-
-    class Config:
-        fields = {'class_': 'class'}
 
 class UnifiedStatusModel(BaseModel):
     systemStatus: SystemStatusModel

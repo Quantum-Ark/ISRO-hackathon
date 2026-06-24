@@ -14,7 +14,7 @@ export default function Replay({ event }) {
   useEffect(() => {
     const eid = event ? event.id : 6;
     setSimulating(true);
-    fetch(`http://${window.location.hostname}:8000/api/replay/${eid}`)
+    fetch(`/api/replay/${eid}`)
       .then(r => r.json())
       .then(data => {
         setReplayPoints(data.points);
@@ -61,28 +61,27 @@ export default function Replay({ event }) {
   const pct = replayPoints.length > 1 ? (progress / (replayPoints.length - 1)) * 100 : 0;
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto py-3 select-none">
-      <div className="flex items-center justify-between border-b border-[#30363D] pb-2">
-        <h1 className="text-lg font-bold font-mono tracking-wider text-[#E6EDF3] uppercase">
-          Hardware Replay Simulator
-        </h1>
+    <div className="premium-dash select-none">
+      <div className="dash-section-head">
+        <span className="dash-section-tag">Replay</span>
+        <h2 className="dash-section-title">Hardware Replay Simulator</h2>
         {event && (
-          <div className="text-xs text-[#8B949E] font-mono">
-            TARGET STORM: <span className="text-[#F1C40F] font-bold">{event.cls}</span>
-            <span className="ml-4 text-[11px] text-[#566176]">{formatUTC(event.ts)}</span>
-          </div>
+          <p className="dash-section-desc">
+            TARGET: <span className="text-[#F1C40F] font-bold">{event.cls}</span>
+            <span className="ml-3">{formatUTC(event.ts)}</span>
+          </p>
         )}
       </div>
 
       {/* Controls Card */}
-      <div className="bg-[#161B22]/70 backdrop-blur-md border border-[#30363D] rounded-lg p-4 shadow-xl">
+      <div className="dash-card p-4 mb-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex gap-2">
             <button 
               className={`px-4 py-1.5 rounded text-xs uppercase tracking-wider font-bold transition-all cursor-pointer ${
                 playing 
                   ? 'bg-red-500 hover:bg-red-600 text-white' 
-                  : 'bg-[#E67E22] hover:bg-[#B85E15] text-white shadow-md shadow-[#E67E22]/10'
+                  : 'bg-white hover:bg-gray-100 text-black shadow-md shadow-white/10'
               }`}
               onClick={() => setPlaying(!playing)}
             >
@@ -109,7 +108,7 @@ export default function Replay({ event }) {
               {[1, 5, 10, 50, 100].map(s => (
                 <button 
                   key={s} 
-                  className={`text-[10px] font-mono px-2.5 py-0.5 rounded cursor-pointer transition-all ${speed === s ? 'bg-[#E67E22] text-white font-bold' : 'text-[#8B949E] hover:text-white'}`} 
+                  className={`text-[10px] font-mono px-2.5 py-0.5 rounded cursor-pointer transition-all ${speed === s ? 'bg-white text-black font-bold shadow-sm' : 'text-[#8B949E] hover:text-white'}`} 
                   onClick={() => setSpeed(s)}
                 >
                   {s}X
@@ -127,7 +126,7 @@ export default function Replay({ event }) {
               {['PRADAN', 'GOES', 'SIMULATED'].map(s => (
                 <button 
                   key={s} 
-                  className={`text-[10px] font-mono px-2.5 py-0.5 rounded cursor-pointer transition-all ${source === s ? 'bg-[#E67E22] text-white font-bold' : 'text-[#8B949E] hover:text-white'}`} 
+                  className={`text-[10px] font-mono px-2.5 py-0.5 rounded cursor-pointer transition-all ${source === s ? 'bg-white text-black font-bold shadow-sm' : 'text-[#8B949E] hover:text-white'}`} 
                   onClick={() => setSource(s)}
                 >
                   {s}
@@ -139,16 +138,16 @@ export default function Replay({ event }) {
       </div>
 
       {/* Seek Track Bar */}
-      <div className="bg-[#161B22]/70 backdrop-blur-md border border-[#30363D] rounded-lg p-4 shadow-xl">
+      <div className="dash-card p-4 mb-4">
         <div className="relative cursor-pointer" onClick={handleSeek}>
           <div className="h-2 bg-[#0D1117] border border-[#30363D] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-100" style={{ width: `${pct}%` }} />
+            <div className="h-full bg-white rounded-full transition-all duration-100" style={{ width: `${pct}%`, boxShadow: '0 0 10px rgba(255,255,255,0.3)' }} />
           </div>
           <div className="flex justify-between items-center mt-2.5">
             <span className="text-[10px] text-[#8B949E] font-mono">
               TIME TAG: <span className="text-[#E6EDF3]">{activePoint ? new Date(activePoint.timestamp).toISOString().slice(11, 19) : '00:00:00'} UTC</span>
             </span>
-            <span className="text-xs text-[#E67E22] font-mono font-bold">
+            <span className="text-xs text-white font-mono font-bold">
               PROGRESS: {pct.toFixed(0)}%
             </span>
             <span className="text-[10px] text-[#8B949E] font-mono">
@@ -159,30 +158,29 @@ export default function Replay({ event }) {
       </div>
 
       {/* Realtime Readings */}
-      <div className="bg-[#161B22]/70 backdrop-blur-md border border-[#30363D] rounded-lg p-4 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-[#30363D] pb-2">
-          <h2 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#8B949E]">
-            Replayed Physical Telemetry
-          </h2>
+      <div className="dash-card p-4 space-y-4">
+        <div className="dash-card-header-left">
+          <div className="dash-card-bar" style={{ background: 'linear-gradient(180deg, #FFFFFF, #3498DB)' }} />
+          <span className="dash-card-title">Replayed Physical Telemetry</span>
           {simulating && (
-            <span className="text-[9px] font-mono text-[#D29922] uppercase animate-pulse">
+            <span className="text-[9px] font-mono text-white/60 uppercase animate-pulse ml-3">
               SYNCING REPLAY STREAM...
             </span>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#0D1117]/60 border border-[#30363D] rounded p-3 text-center">
+          <div className="dash-card-body !p-4 text-center">
             <div className="text-[9px] uppercase tracking-wider font-semibold font-mono text-[#8B949E] mb-1">SoLEXS (Soft X-Ray)</div>
-            <div className="text-xl font-bold font-mono text-[#E67E22]">{fmtFlux(soft)}</div>
+            <div className="text-xl font-bold font-mono text-[#E6EDF3]">{fmtFlux(soft)}</div>
             <div className="text-[8px] text-[#566176] font-mono mt-1">W/m²</div>
           </div>
-          <div className="bg-[#0D1117]/60 border border-[#30363D] rounded p-3 text-center">
+          <div className="dash-card-body !p-4 text-center">
             <div className="text-[9px] uppercase tracking-wider font-semibold font-mono text-[#8B949E] mb-1">HEL1OS (Hard X-Ray)</div>
             <div className="text-xl font-bold font-mono text-[#3498DB]">{fmtFlux(hard)}</div>
             <div className="text-[8px] text-[#566176] font-mono mt-1">W/m² equivalent</div>
           </div>
-          <div className="bg-[#0D1117]/60 border border-[#30363D] rounded p-3 text-center">
+          <div className="dash-card-body !p-4 text-center">
             <div className="text-[9px] uppercase tracking-wider font-semibold font-mono text-[#8B949E] mb-1">Hardness Ratio</div>
             <div className={`text-xl font-bold font-mono ${hr > 0.06 ? 'text-orange-400' : 'text-[#8B949E]'}`}>
               {hr.toFixed(4)}
@@ -193,8 +191,8 @@ export default function Replay({ event }) {
 
         {/* Model State Simulator readout */}
         {activePoint && activePoint.status && (
-          <div className="bg-[#0D1117]/80 border border-[#30363D]/80 rounded p-3 font-mono text-[10px] space-y-2">
-            <div className="text-[9px] uppercase font-bold text-orange-400 border-b border-[#30363D]/40 pb-1">
+          <div className="dash-card-body !p-4 font-mono text-[10px] space-y-2">
+            <div className="text-[9px] uppercase font-bold text-white/80 border-b border-[#30363D]/40 pb-1">
               Pipeline Neural Inferences:
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[#8B949E]">
@@ -204,7 +202,7 @@ export default function Replay({ event }) {
               <div>Z-SCORE VALUE: <span className="text-[#E6EDF3] block">{activePoint.status.nowcast.zScore.toFixed(2)}σ</span></div>
             </div>
             {activePoint.status.hardnessRatio.preFlareSignal && (
-              <div className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-1 rounded text-[9px] font-bold animate-pulse text-center">
+              <div className="bg-white/10 text-white border border-white/20 px-2 py-1 rounded text-[9px] font-bold animate-pulse text-center">
                 ⚠️ SPECTRAL HARDENING DETECTED: PRE-FLARE WARNING FIRED (+{activePoint.status.hardnessRatio.minutesEarly} MINUTES ADVANCE WARNING)
               </div>
             )}
@@ -216,7 +214,7 @@ export default function Replay({ event }) {
           <div className="border-t border-[#30363D]/40 pt-3 text-[9px] font-mono text-[#566176] flex flex-wrap gap-x-6 gap-y-1">
             <div>EVENT ID: <span className="text-[#8B949E]">{event.id}</span></div>
             <div>PEAK FLUX: <span className="text-[#8B949E]">{event.peak.toExponential(1)} W/m²</span></div>
-            <div>GOES LEAD TIME: <span className="text-orange-400 font-bold">+{event.lead} MIN</span></div>
+            <div>GOES LEAD TIME: <span className="text-white font-bold">+{event.lead} MIN</span></div>
             <div>INSTRUMENT COMBINATION: <span className="text-[#8B949E]">{event.instrument || event.instr}</span></div>
             <div>STORM DURATION: <span className="text-[#8B949E]">{event.duration || event.dur}</span></div>
             <div>DETECTION CONFIDENCE: <span className="text-green-400 font-bold">{event.conf}%</span></div>

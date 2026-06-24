@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { formatUTC } from '../lib/data';
 
 export default function FluxChart({ data, range, onRange }) {
@@ -306,7 +307,7 @@ export default function FluxChart({ data, range, onRange }) {
   if (!scales || !filtered.length) {
     return (
       <div 
-        className="glass-card h-full flex flex-col justify-center items-center p-6 text-center select-none"
+        className="h-full flex flex-col justify-center items-center p-6 text-center select-none"
         style={{ overflow: 'hidden', position: 'relative' }}
       >
         <div className="w-10 h-10 rounded-full border-2 border-[#30363D] border-t-[#E67E22] animate-spin mb-3" />
@@ -316,151 +317,153 @@ export default function FluxChart({ data, range, onRange }) {
     );
   }
 
-  // ── Fullscreen overlay ──────────────────────────────────────────
+  // ── Fullscreen overlay (rendered via portal) ──────────────────
 
-  if (isFs) {
-    return (
+  const fullscreenOverlay = isFs ? createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0D1117]/90 backdrop-blur-xl"
+      style={{ animation: 'fadeIn 0.2s ease-out' }}
+      onClick={() => setFullscreen(false)}
+    >
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D1117]/90 backdrop-blur-xl"
-        style={{ animation: 'fadeIn 0.2s ease-out' }}
-        onClick={() => setFullscreen(false)}
+        className="w-[94vw] h-[90vh] glass-heavy rounded-2xl flex flex-col overflow-hidden shadow-2xl"
+        style={{ boxShadow: '0 25px 80px rgba(0,0,0,0.6), 0 0 40px rgba(230,126,34,0.05)' }}
+        onClick={e => e.stopPropagation()}
       >
-        <div
-          className="w-[94vw] h-[90vh] bg-[#161B22]/95 border border-[rgba(255,255,255,0.08)] rounded-2xl flex flex-col overflow-hidden shadow-2xl"
-          style={{ boxShadow: '0 25px 80px rgba(0,0,0,0.6), 0 0 40px rgba(230,126,34,0.05)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* FS Header */}
-          <div className="px-5 sm:px-8 py-4 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between bg-[#0D1117]/40 select-none shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#E67E22] to-[#3498DB]" />
-              <h2 className="text-sm sm:text-base uppercase font-mono tracking-wider font-bold text-[#E6EDF3]">
-                X-Ray Flux — Expanded View
-              </h2>
-              <span className="text-[9px] sm:text-[11px] text-[#484F58] font-mono">Aditya-L1 · Real-time</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Range selector */}
-              <div className="flex bg-[#0D1117]/60 backdrop-blur-sm p-0.5 border border-[rgba(255,255,255,0.06)] rounded-md">
-                {[1, 3, 6, 12, 24].map(h => (
-                  <button
-                    key={h}
-                    className={`text-[9px] sm:text-[11px] font-mono px-2 sm:px-3 py-1 rounded cursor-pointer transition-all duration-200 ${
-                      range === h
-                        ? 'bg-gradient-to-r from-[#E67E22] to-[#D68910] text-white font-bold shadow-sm'
-                        : 'text-[#8B949E] hover:text-white hover:bg-[#21262D]/50'
-                    }`}
-                    onClick={() => onRange(h)}
-                  >
-                    {h}H
-                  </button>
-                ))}
-              </div>
-
-              {/* Close button */}
-              <button
-                onClick={() => setFullscreen(false)}
-                className="text-[#8B949E] hover:text-white transition-colors duration-200 p-1.5 rounded-lg hover:bg-[#21262D]/50 cursor-pointer"
-                title="Close fullscreen (Esc)"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="4 14 10 14 10 20" />
-                  <polyline points="20 10 14 10 14 4" />
-                  <line x1="14" y1="10" x2="21" y2="3" />
-                  <line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-              </button>
-            </div>
+        {/* FS Header */}
+        <div className="px-5 sm:px-8 py-4 border-b border-white/10 flex items-center justify-between bg-black/20 select-none shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-[#FFFFFF] to-[#3498DB]" />
+            <h2 className="text-sm sm:text-base uppercase font-mono tracking-wider font-bold text-[#E6EDF3]">
+              X-Ray Flux — Expanded View
+            </h2>
+            <span className="text-[9px] sm:text-[11px] text-[#484F58] font-mono">Aditya-L1 · Real-time</span>
           </div>
 
-          {/* FS SVG Canvas */}
-          <div ref={fsContainerRef} className="p-3 sm:p-6 flex-1 overflow-hidden relative">
-            {renderChartSvg()}
-            {renderTooltip()}
-          </div>
+          <div className="flex items-center gap-3">
+            {/* Range selector */}
+            <div className="flex bg-[#0D1117]/60 backdrop-blur-sm p-0.5 border border-[rgba(255,255,255,0.06)] rounded-md">
+              {[1, 3, 6, 12, 24].map(h => (
+                <button
+                  key={h}
+                  className={`text-[9px] sm:text-[11px] font-mono px-2 sm:px-3 py-1 rounded cursor-pointer transition-all duration-200 ${
+                    range === h
+                      ? 'bg-white text-black font-bold shadow-sm'
+                      : 'text-[#8B949E] hover:text-white hover:bg-[#21262D]/50'
+                  }`}
+                  onClick={() => onRange(h)}
+                >
+                  {h}H
+                </button>
+              ))}
+            </div>
 
-          {/* FS Footer hint */}
-          <div className="px-5 sm:px-8 py-2 border-t border-[rgba(255,255,255,0.04)] flex items-center justify-between bg-[#0D1117]/20 shrink-0">
-            <span className="text-[8px] sm:text-[10px] font-mono text-[#484F58]">
-              Hover over chart for detailed values · Press <kbd className="px-1.5 py-0.5 bg-[#21262D] border border-[rgba(255,255,255,0.08)] rounded text-[7px] sm:text-[9px]">Esc</kbd> to close
-            </span>
-            <span className="text-[8px] sm:text-[10px] font-mono text-[#484F58]">
-              {filtered.length.toLocaleString()} data points · {range}H window
-            </span>
+            {/* Close button */}
+            <button
+              onClick={() => setFullscreen(false)}
+              className="text-[#8B949E] hover:text-white transition-colors duration-200 p-1.5 rounded-lg hover:bg-[#21262D]/50 cursor-pointer"
+              title="Close fullscreen (Esc)"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 14 10 14 10 20" />
+                <polyline points="20 10 14 10 14 4" />
+                <line x1="14" y1="10" x2="21" y2="3" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* FS SVG Canvas */}
+        <div ref={fsContainerRef} className="p-3 sm:p-6 flex-1 overflow-hidden relative">
+          {renderChartSvg()}
+          {renderTooltip()}
+        </div>
+
+        {/* FS Footer hint */}
+        <div className="px-5 sm:px-8 py-2 border-t border-white/10 flex items-center justify-between bg-black/10 shrink-0">
+          <span className="text-[8px] sm:text-[10px] font-mono text-[#484F58]">
+            Hover over chart for detailed values · Press <kbd className="px-1.5 py-0.5 bg-[#21262D] border border-[rgba(255,255,255,0.08)] rounded text-[7px] sm:text-[9px]">Esc</kbd> to close
+          </span>
+          <span className="text-[8px] sm:text-[10px] font-mono text-[#484F58]">
+            {filtered.length.toLocaleString()} data points · {range}H window
+          </span>
+        </div>
       </div>
-    );
-  }
+    </div>,
+    document.body
+  ) : null;
+
 
   // ── Normal card view ────────────────────────────────────────────
 
   return (
-    <div
-      className="glass-card h-full flex flex-col overflow-hidden relative group"
-    >
-      {/* Header */}
-      <div className="px-3 sm:px-4 py-2 border-b border-[rgba(255,255,255,0.05)] flex flex-wrap items-center justify-between bg-[#0D1117]/30 select-none gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-1 h-4 rounded-full bg-gradient-to-b from-[#E67E22] to-[#3498DB]" />
-          <h2 className="text-[10px] sm:text-xs uppercase font-mono tracking-wider font-semibold text-[#8B949E] truncate">
-            X-Ray Flux
-          </h2>
-          <span className="text-[7px] sm:text-[9px] text-[#484F58] font-mono hidden sm:inline">Aditya-L1 · 1-min cadence</span>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-          {/* Legend */}
-          <div className="flex items-center gap-2 sm:gap-3 text-[8px] sm:text-[9px] font-mono">
-            <div className="flex items-center gap-1">
-              <span className="w-2.5 h-[2px] bg-[#E67E22] inline-block rounded-full" style={{ boxShadow: '0 0 4px rgba(230,126,34,0.5)' }} />
-              <span className="text-[#8B949E] hidden xs:inline">SOFT</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-2.5 h-[2px] bg-[#3498DB] inline-block rounded-full" style={{ boxShadow: '0 0 4px rgba(52,152,219,0.5)' }} />
-              <span className="text-[#8B949E] hidden xs:inline">HARD</span>
-            </div>
+    <>
+      {fullscreenOverlay}
+      <div
+        className="h-full flex flex-col overflow-hidden relative"
+      >
+        {/* Header */}
+        <div className="dash-card-header">
+          <div className="dash-card-header-left">
+            <div className="dash-card-bar" style={{ background: 'linear-gradient(180deg, #FFFFFF, #3498DB)' }} />
+            <span className="dash-card-title">X-Ray Flux</span>
+            <span className="dash-card-sub">Aditya-L1 · 1-min cadence</span>
           </div>
 
-          {/* Range selector */}
-          <div className="flex bg-[#0D1117]/60 backdrop-blur-sm p-0.5 border border-[rgba(255,255,255,0.06)] rounded-md">
-            {[1, 3, 6, 12].map(h => (
-              <button
-                key={h}
-                className={`text-[8px] sm:text-[9px] font-mono px-1.5 sm:px-2.5 py-0.5 rounded cursor-pointer transition-all duration-200 ${
-                  range === h
-                    ? 'bg-gradient-to-r from-[#E67E22] to-[#D68910] text-white font-bold shadow-sm'
-                    : 'text-[#8B949E] hover:text-white hover:bg-[#21262D]/50'
-                }`}
-                onClick={() => onRange(h)}
-              >
-                {h}H
-              </button>
-            ))}
-          </div>
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            {/* Legend */}
+            <div className="flex items-center gap-2 sm:gap-3 text-[8px] sm:text-[9px] font-mono">
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-[2px] bg-[#E67E22] inline-block rounded-full" style={{ boxShadow: '0 0 4px rgba(230,126,34,0.5)' }} />
+                <span className="text-[#8B949E] hidden xs:inline">SOFT</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-[2px] bg-[#3498DB] inline-block rounded-full" style={{ boxShadow: '0 0 4px rgba(52,152,219,0.5)' }} />
+                <span className="text-[#8B949E] hidden xs:inline">HARD</span>
+              </div>
+            </div>
 
-          {/* Fullscreen toggle */}
-          <button
-            onClick={toggleFs}
-            className="text-[#8B949E] hover:text-white transition-colors duration-200 p-1 rounded-md hover:bg-[#21262D]/50 cursor-pointer"
-            title="Expand fullscreen"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 3 21 3 21 9" />
-              <polyline points="9 21 3 21 3 15" />
-              <line x1="21" y1="3" x2="14" y2="10" />
-              <line x1="3" y1="21" x2="10" y2="14" />
-            </svg>
-          </button>
+            {/* Range selector */}
+            <div className="flex bg-[#0D1117]/60 backdrop-blur-sm p-0.5 border border-[rgba(255,255,255,0.06)] rounded-md">
+              {[1, 3, 6, 12].map(h => (
+                <button
+                  key={h}
+                  className={`text-[8px] sm:text-[9px] font-mono px-1.5 sm:px-2.5 py-0.5 rounded cursor-pointer transition-all duration-200 ${
+                    range === h
+                      ? 'bg-white text-black font-bold shadow-sm'
+                      : 'text-[#8B949E] hover:text-white hover:bg-[#21262D]/50'
+                  }`}
+                  onClick={() => onRange(h)}
+                >
+                  {h}H
+                </button>
+              ))}
+            </div>
+
+            {/* Fullscreen toggle */}
+            <button
+              onClick={toggleFs}
+              className="text-[#8B949E] hover:text-white transition-colors duration-200 p-1 rounded-md hover:bg-[#21262D]/50 cursor-pointer"
+              title="Expand fullscreen"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* SVG Canvas */}
+        <div ref={containerRef} className="dash-card-body flex-1 overflow-hidden relative">
+          {renderChartSvg()}
+          {renderTooltip()}
         </div>
       </div>
-
-      {/* SVG Canvas */}
-      <div ref={containerRef} className="p-2 sm:p-3 flex-1 overflow-hidden relative">
-        {renderChartSvg()}
-        {renderTooltip()}
-      </div>
-    </div>
+    </>
   );
 }
+

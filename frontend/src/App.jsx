@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Landing from './components/Landing';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -7,12 +7,16 @@ import Catalog from './components/Catalog';
 import Metrics from './components/Metrics';
 import { initWebSocketConnection } from './lib/data';
 
+
+
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [view, setView] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [replayEvent, setReplayEvent] = useState(null);
   const [time, setTime] = useState(new Date());
   const [initDone, setInitDone] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => {
     if (!initDone) {
@@ -23,23 +27,42 @@ export default function App() {
     return () => clearInterval(id);
   }, [initDone]);
 
+  const handleView = (v) => {
+    if (v === activeTab) return;
+    setActiveTab(v);
+    setTransitioning(true);
+    setTimeout(() => {
+      setView(v);
+      setTimeout(() => setTransitioning(false), 50);
+    }, 180);
+  };
+
   if (showLanding) {
     return <Landing onEnter={() => setShowLanding(false)} />;
   }
 
   const mainContent = (
-    <div className="flex-1 overflow-auto" style={{ padding: 'clamp(8px, 1.5vw, 16px)' }}>
+    <div className="flex-1 overflow-auto" style={{ padding: 'clamp(12px, 2vw, 24px)' }}>
       {view === 'dashboard' && <Dashboard />}
       {view === 'replay' && <Replay event={replayEvent} />}
-      {view === 'catalog' && <Catalog onReplay={e => { setReplayEvent(e); setView('replay'); }} />}
+      {view === 'catalog' && <Catalog onReplay={e => { setReplayEvent(e); handleView('replay'); }} />}
       {view === 'metrics' && <Metrics />}
     </div>
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header view={view} onView={setView} time={time} />
-      {mainContent}
-    </div>
+    <>
+
+
+
+
+      {/* Main app shell */}
+      <div className="app-shell">
+        <Header view={activeTab} onView={handleView} time={time} />
+        <div className={`flex-1 overflow-auto ${transitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'} transition-all duration-200 ease-out`}>
+          {mainContent}
+        </div>
+      </div>
+    </>
   );
 }

@@ -92,7 +92,7 @@ def main():
     parser.add_argument("--mode", type=str, default="live", choices=["live", "replay", "aditya"], help="Run mode")
     parser.add_argument("--event", type=int, default=6, help="Event ID for replay")
     parser.add_argument("--speed", type=float, default=1.0, help="Simulation speed multiplier")
-    parser.add_argument("--api-url", type=str, default="http://localhost:8000/api/update", help="FastAPI update endpoint")
+    parser.add_argument("--api-url", type=str, default="http://localhost:8001/api/update", help="FastAPI update endpoint")
     args = parser.parse_args()
     
     print(f"Starting pipeline in {args.mode.upper()} mode...")

@@ -114,21 +114,74 @@ export function useLiveState() {
 let ws = null;
 let reconnectTimer = null;
 
-const API_HTTP_HOST = `http://${window.location.hostname}:8000`;
-const API_WS_HOST = `ws://${window.location.hostname}:8000`;
+const API_HTTP_HOST = '';
+const API_WS_HOST = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+
+let pollTimer = null;
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(() => {
+    // Poll status
+    fetch(`${API_HTTP_HOST}/api/status`)
+      .then(r => r.json())
+      .then(data => {
+        updateState({
+          systemStatus: data.systemStatus,
+          nowcast: data.nowcast,
+          forecast: data.forecast,
+          hardnessRatio: data.hardnessRatio,
+          alerts: data.alerts || []
+        });
+      })
+      .catch(() => {});
+    // Poll timeseries
+    fetch(`${API_HTTP_HOST}/api/timeseries?hours=6`)
+      .then(r => r.json())
+      .then(points => {
+        updateState({ fluxData: points });
+      })
+      .catch(() => {});
+  }, 5000);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
 
 export function initWebSocketConnection() {
-  // Fetch initial timeseries history via REST
+  // Fetch initial data via REST immediately
+  fetch(`${API_HTTP_HOST}/api/status`)
+    .then(r => r.json())
+    .then(data => {
+      updateState({
+        systemStatus: { ...data.systemStatus, pipeline: 'Operational' },
+        nowcast: data.nowcast,
+        forecast: data.forecast,
+        hardnessRatio: data.hardnessRatio,
+        alerts: data.alerts || []
+      });
+    })
+    .catch(err => {
+      console.warn("Failed to load status from API server.", err);
+    });
+
   fetch(`${API_HTTP_HOST}/api/timeseries?hours=6`)
     .then(r => r.json())
     .then(points => {
       updateState({ fluxData: points });
     })
     .catch(err => {
-      console.warn("Failed to load timeseries from API server. Falling back to empty chart.", err);
+      console.warn("Failed to load timeseries from API server.", err);
     });
 
-  // Connect WebSocket
+  // Start REST polling as primary data source
+  startPolling();
+
+  // Also try WebSocket for lower latency
   connectWS();
 }
 
@@ -151,6 +204,8 @@ function connectWS() {
         dataLatency: '1.2s'
       }
     });
+    // WebSocket is connected, stop REST polling to avoid duplicates
+    stopPolling();
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
       reconnectTimer = null;
@@ -161,10 +216,8 @@ function connectWS() {
     try {
       const data = jsonParse(event.data);
       if (data) {
-        // Update variables from websocket broadcast
         const nextFlux = [...state.fluxData];
         
-        // Append point to local rolling fluxData array
         const ts_ms = Date.now();
         nextFlux.push({
           timestamp: ts_ms,
@@ -173,7 +226,6 @@ function connectWS() {
           hardnessRatio: data.hardnessRatio.current
         });
         
-        // Keep last 1000 points
         if (nextFlux.length > 1000) {
           nextFlux.shift();
         }
@@ -193,14 +245,9 @@ function connectWS() {
   };
   
   ws.onclose = () => {
-    console.warn("WebSocket disconnected from Helios-Cortex server. Retrying in 5s...");
-    updateState({
-      systemStatus: {
-        ...state.systemStatus,
-        pipeline: 'Disconnected (Offline)',
-        dataLatency: '—'
-      }
-    });
+    console.warn("WebSocket disconnected. Falling back to REST polling. Retrying WS in 5s...");
+    // Fall back to REST polling
+    startPolling();
     
     if (!reconnectTimer) {
       reconnectTimer = setTimeout(() => {

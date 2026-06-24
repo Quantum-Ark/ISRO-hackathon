@@ -9,7 +9,7 @@ export default function Catalog({ onReplay }) {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:8000/api/catalog`)
+    fetch(`/api/catalog`)
       .then(r => r.json())
       .then(data => {
         const mapped = data.map(e => ({ 
@@ -39,17 +39,16 @@ export default function Catalog({ onReplay }) {
   const S = ({ col }) => <span className="text-[#566176] ml-1 text-[8px]">{sort === col ? (dir === 'desc' ? '▼' : '▲') : ''}</span>;
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto py-4 select-none">
-      <div className="flex items-baseline justify-between border-b border-[#30363D] pb-2">
-        <h1 className="text-lg font-bold font-mono tracking-wider text-[#E6EDF3] uppercase">
-          Solar Flare Event Catalog
-        </h1>
-        <span className="text-xs text-[#8B949E] font-mono">
+    <div className="premium-dash select-none">
+      <div className="dash-section-head">
+        <span className="dash-section-tag">Catalog</span>
+        <h2 className="dash-section-title">Solar Flare Event Catalog</h2>
+        <p className="dash-section-desc">
           TOTAL RECORDED EVENTS: <span className="text-orange-400 font-bold">{events.length}</span>
-        </span>
+        </p>
       </div>
 
-      <div className="bg-[#161B22]/70 backdrop-blur-md border border-[#30363D] rounded-lg overflow-hidden shadow-xl">
+      <div className="dash-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[#30363D]">
             <thead className="bg-[#0D1117]/50 font-mono text-[9px] text-[#8B949E] uppercase tracking-wider">
@@ -76,7 +75,7 @@ export default function Catalog({ onReplay }) {
                   <td className="px-6 py-3 whitespace-nowrap">{e.dur}</td>
                   <td className="px-6 py-2 whitespace-nowrap text-center">
                     <button 
-                      className="px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider cursor-pointer bg-[#21262D] hover:bg-[#E67E22] text-[#8B949E] hover:text-white border border-[#30363D] hover:border-[#E67E22] transition-all duration-200" 
+                      className="px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider cursor-pointer bg-[#21262D] hover:bg-white text-[#8B949E] hover:text-black border border-[#30363D] hover:border-white transition-all duration-200" 
                       onClick={() => onReplay(e)}
                     >
                       Replay
