@@ -27,7 +27,7 @@ The key insight is the **Spectral Hardness Ratio** (HEL1OS / SoLEXS), grounded i
 
 ## Live Demo
 
-Dashboard: [https://quantum-ark.github.io/ISRO-hackathon/](https://quantum-ark.github.io/ISRO-hackathon/)
+Dashboard: https://helios-cortex.vercel.app/
 
 ### Dashboard Walkthrough
 
