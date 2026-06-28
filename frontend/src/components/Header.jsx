@@ -3,6 +3,7 @@ import { useLiveState } from '../lib/data';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: '◉' },
+  { key: 'impact', label: 'Impact', icon: '✦' },
   { key: 'replay', label: 'Replay', icon: '▶' },
   { key: 'catalog', label: 'Catalog', icon: '☰' },
   { key: 'metrics', label: 'Metrics', icon: '◈' },

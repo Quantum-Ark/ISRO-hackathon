@@ -4,6 +4,7 @@ import StatusBlock from './StatusBlock';
 import AlertList from './AlertList';
 import HardnessMeter from './HardnessMeter';
 import DataSourcePanel from './DataSourcePanel';
+import { ImpactStrip } from './ImpactPanel';
 import { useLiveState, fmtFlux } from '../lib/data';
 
 function HeroCard({ tag, value, sub, color, badge, delay }) {
@@ -19,7 +20,7 @@ function HeroCard({ tag, value, sub, color, badge, delay }) {
   );
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }) {
   const [range, setRange] = useState(6);
   const { fluxData, alerts, hardnessRatio, nowcast, forecast, systemStatus } = useLiveState();
 
@@ -37,6 +38,9 @@ export default function Dashboard() {
         <HeroCard tag="Hardness Ratio" value={hardnessRatio.current.toFixed(4)} badge={hardnessRatio.preFlareSignal ? `⚠ +${hardnessRatio.minutesEarly}m` : undefined} color={hardnessRatio.preFlareSignal ? '#FBBF24' : ''} delay={0.18} />
         <HeroCard tag="Lead Time" value={`+${forecast.leadTime || 0} min`} sub="vs GOES onset" delay={0.22} />
       </div>
+
+      {/* ===== IMPACT SUMMARY STRIP ===== */}
+      <ImpactStrip onNavigate={onNavigate} />
 
       {/* ===== MAIN GRID: Chart + Status ===== */}
       <div className="premium-dash-grid">

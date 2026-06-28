@@ -78,7 +78,8 @@ let state = {
     preFlareSignal: false,
     minutesEarly: 0
   },
-  alerts: []
+  alerts: [],
+  flareClass: 'B1.0'
 };
 
 const listeners = new Set();
@@ -131,7 +132,8 @@ function startPolling() {
           nowcast: data.nowcast,
           forecast: data.forecast,
           hardnessRatio: data.hardnessRatio,
-          alerts: data.alerts || []
+          alerts: data.alerts || [],
+          flareClass: data.flareClass || state.flareClass
         });
       })
       .catch(() => {});
@@ -162,7 +164,8 @@ export function initWebSocketConnection() {
         nowcast: data.nowcast,
         forecast: data.forecast,
         hardnessRatio: data.hardnessRatio,
-        alerts: data.alerts || []
+        alerts: data.alerts || [],
+        flareClass: data.flareClass || state.flareClass
       });
     })
     .catch(err => {
@@ -236,7 +239,8 @@ function connectWS() {
           nowcast: data.nowcast,
           forecast: data.forecast,
           hardnessRatio: data.hardnessRatio,
-          alerts: data.alerts
+          alerts: data.alerts,
+          flareClass: data.flareClass || state.flareClass
         });
       }
     } catch (e) {

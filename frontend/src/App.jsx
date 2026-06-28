@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Landing from './components/Landing';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
+import ImpactPanel from './components/ImpactPanel';
 import Replay from './components/Replay';
 import Catalog from './components/Catalog';
 import Metrics from './components/Metrics';
@@ -43,7 +44,8 @@ export default function App() {
 
   const mainContent = (
     <div className="flex-1 overflow-auto" style={{ padding: 'clamp(12px, 2vw, 24px)' }}>
-      {view === 'dashboard' && <Dashboard />}
+      {view === 'dashboard' && <Dashboard onNavigate={handleView} />}
+      {view === 'impact' && <ImpactPanel />}
       {view === 'replay' && <Replay event={replayEvent} />}
       {view === 'catalog' && <Catalog onReplay={e => { setReplayEvent(e); handleView('replay'); }} />}
       {view === 'metrics' && <Metrics />}

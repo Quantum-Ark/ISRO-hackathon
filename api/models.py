@@ -64,6 +64,7 @@ class UnifiedStatusModel(BaseModel):
     forecast: ForecastModel
     hardnessRatio: HardnessRatioModel
     alerts: List[AlertModel]
+    flareClass: Optional[str] = None
 
 class TimeseriesPoint(BaseModel):
     timestamp: int

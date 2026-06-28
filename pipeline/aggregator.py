@@ -181,5 +181,6 @@ class AlertAggregator:
             'nowcast': nowcast_out,
             'forecast': forecast_out,
             'hardnessRatio': hardness_ratio_out,
-            'alerts': self.alerts
+            'alerts': self.alerts,
+            'flareClass': f_class
         }
