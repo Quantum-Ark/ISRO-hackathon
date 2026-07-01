@@ -12,6 +12,7 @@
       <h1>HELIOS-CORTEX</h1>
       <h3>☀️ Solar Flare Intelligence System</h3>
       <p>Real-Time Nowcasting & Predictive Forecasting for Aditya-L1</p>
+      <p><strong>🇮🇳 Bhartiya Antariksh Hackathon 2026</strong></p>
     </td>
   </tr>
 </table>
@@ -20,7 +21,7 @@
 
 <table align="center" border="0" cellpadding="10" cellspacing="0">
   <tr>
-    <td><img src="https://img.shields.io/badge/ISRO-SPECTRUM%202026-FF6B35?style=for-the-badge" /></td>
+    <td><img src="https://img.shields.io/badge/BHARTIYA%20ANTARIKSH%20HACKATHON-2026-FF6B35?style=for-the-badge" /></td>
     <td><img src="https://img.shields.io/badge/Aditya--L1-Lagrange%20L1-2ECC71?style=for-the-badge" /></td>
     <td><img src="https://img.shields.io/badge/STATUS-LIVE%20MONITORING-38BDF8?style=for-the-badge" /></td>
   </tr>
@@ -794,7 +795,7 @@ npm run dev
 <table align="center" border="0" cellpadding="20" cellspacing="0">
   <tr>
     <td align="center" bgcolor="#0d1117" style="border-radius: 10px; border: 2px solid #FF6B35;">
-      <h3>🇮🇳 ISRO Spectrum Hackathon 2026</h3>
+      <h3>🇮🇳 Bhartiya Antariksh Hackathon 2026</h3>
       <p>Leveraging Aditya-L1's <strong>SoLEXS</strong> and <strong>HEL1OS</strong> payloads for real-time solar flare intelligence</p>
       <br />
       <table align="center" border="0" cellpadding="5" cellspacing="0">
