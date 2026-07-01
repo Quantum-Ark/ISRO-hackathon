@@ -3,8 +3,8 @@
 ```
     ╔═══════════════════════════════════════════════════════════════════════════════╗
     ║                                                                               ║
-    ║      ████████╗██╗  ██╗███████╗                                             ║
-    ║      ╚══██╔══╝██║  ██║██╔════╝                                             ║
+    ║      ████████╗██╗  ██╗███████╗                                                ║
+    ║      ╚══██╔══╝██║  ██║██╔════╝                                                ║
     ║         ██║   ███████║█████╗       ██████╗██╗   ██╗██████╗ ███████╗██████╗    ║
     ║         ██║   ██╔══██║██╔══╝      ██╔════╝██║   ██║██╔══██╗██╔════╝██╔══██╗   ║
     ║         ██║   ██║  ██║███████╗    ██║     ██║   ██║██████╔╝█████╗  ██████╔╝   ║
@@ -242,12 +242,12 @@
     ╔════════════════════════════════════════════════════════════════════════════╗
     ║                                                                            ║
     ║   🧭 Navigation    📡 Communications    🛡 Defence    🌤 Weather          ║
-    ║   GPS • NavIC      INSAT • GSAT        Recon Sats    INSAT-3D            ║
-    ║   GLONASS • GAGAN  Military SATCOM      OTH Radar     Oceansat            ║
+    ║   GPS • NavIC      INSAT • GSAT        Recon Sats    INSAT-3D              ║
+    ║   GLONASS • GAGAN  Military SATCOM      OTH Radar     Oceansat             ║
     ║                                                                            ║
-    ║   ⚡ Power Grid    👨‍🚀 Space Station    🔬 Instruments                      ║
-    ║   HV Transformers  ISS • Gaganyaan      Aditya-L1                        ║
-    ║   Pipelines        Tiangong • Gateway   Hubble • JWST                    ║
+    ║   ⚡ Power Grid    👨‍🚀 Space Station    🔬 Instruments                     ║
+    ║   HV Transformers  ISS • Gaganyaan      Aditya-L1                          ║
+    ║   Pipelines        Tiangong • Gateway   Hubble • JWST                      ║
     ║                                                                            ║
     ╚════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -283,21 +283,21 @@ An interactive SVG map of India color-codes each state/UT by:
 ```
     ┌───────────────────────────────────────────────────────────────────────┐
     │                                                                       │
-    │   🔮 Model Decision: M-FLARE · 87% Confidence                        │
+    │   🔮 Model Decision: M-FLARE · 87% Confidence                         │
     │   ═══════════════════════════════════════════════════════════════     │
     │                                                                       │
-    │   Top Contributors:                                                    │
+    │   Top Contributors:                                                   │
     │                                                                       │
-    │   #1  Soft X-ray Flux (0.1-0.8nm)   ████████████████████████  32%   │
-    │   #2  Hard X-ray Flux (0.05-0.4nm)  ██████████████████        22%   │
-    │   #3  Spectral Hardness Ratio        ██████████████            18%   │
-    │   #4  Flux Rise Rate (dF/dt)         ███████████               12%   │
-    │   #5  Adaptive Z-Score               ███████                    8%   │
-    │   #6  TCN Temporal Context (3h)      █████                      6%   │
-    │   #7  Rolling MAD (Background)       █                          2%   │
+    │   #1  Soft X-ray Flux (0.1-0.8nm)   ████████████████████████  32%     │
+    │   #2  Hard X-ray Flux (0.05-0.4nm)  ██████████████████        22%     │
+    │   #3  Spectral Hardness Ratio        ██████████████            18%    │
+    │   #4  Flux Rise Rate (dF/dt)         ███████████               12%    │
+    │   #5  Adaptive Z-Score               ███████                    8%    │
+    │   #6  TCN Temporal Context (3h)      █████                      6%    │
+    │   #7  Rolling MAD (Background)       █                          2%    │
     │                                                                       │
     │   ─────────────────────────────────────────────────────────────────   │
-    │   📊 Top 3 features = 72% of model decision weight.                  │
+    │   📊 Top 3 features = 72% of model decision weight.                   │
     │                                                                       │
     └───────────────────────────────────────────────────────────────────────┘
 ```
@@ -442,7 +442,7 @@ Navigate to **http://localhost:5173** and click **Launch Dashboard**.
 ```
     ┌────────────────────────────────────────────────────────────────────┐
     │              CONFUSION MATRIX (M-CLASS+)                          │
-    │                                                                    │
+    │                                                                   │
     │                     ┌──────────────────┬──────────────────┐       │
     │                     │  Predicted: YES  │  Predicted: NO   │       │
     │    ┌────────────────┼──────────────────┼──────────────────┤       │
@@ -450,8 +450,8 @@ Navigate to **http://localhost:5173** and click **Launch Dashboard**.
     │    ├────────────────┼──────────────────┼──────────────────┤       │
     │    │ Actual: NO     │     FP:  12      │     TN: 438      │       │
     │    └────────────────┴──────────────────┴──────────────────┘       │
-    │                                                                    │
-    │    Correct Skill Score: 0.73     Heidke Skill Score: 0.68        │
+    │                                                                   │
+    │    Correct Skill Score: 0.73     Heidke Skill Score: 0.68         │
     └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -467,7 +467,7 @@ Navigate to **http://localhost:5173** and click **Launch Dashboard**.
     ┌───────────────────────────────────────────────────────────────────────────────┐
     │                                                                               │
     │   1️⃣   MULTI-INSTRUMENT FUSION                                               │
-    │        Cross-correlating SoLEXS + HEL1OS captures pre-flare signatures       │
+    │        Cross-correlating SoLEXS + HEL1OS captures pre-flare signatures        │
     │        that single-channel models miss entirely.                              │
     │                                                                               │
     │   2️⃣   ADAPTIVE THRESHOLDING                                                  │
@@ -479,11 +479,11 @@ Navigate to **http://localhost:5173** and click **Launch Dashboard**.
     │        predictions even with limited Aditya-L1 data (142 samples).            │
     │                                                                               │
     │   4️⃣   CASCADE ARCHITECTURE                                                   │
-    │        Separating nowcasting from forecasting avoids conflicting               │
+    │        Separating nowcasting from forecasting avoids conflicting              │
     │        optimization goals — each stage specializes.                           │
     │                                                                               │
     │   5️⃣   EXPLAINABLE AI                                                        │
-    │        Every prediction comes with SHAP-inspired feature importance            │
+    │        Every prediction comes with SHAP-inspired feature importance           │
     │        breakdown — operators understand WHY the model decided.                │
     │                                                                               │
     │   6️⃣   INDIA-SPECIFIC IMPACT                                                  │
@@ -512,9 +512,9 @@ Navigate to **http://localhost:5173** and click **Launch Dashboard**.
     ║                                                                           ║
     ║         ═══════════════════════════════════════════════════════           ║
     ║                                                                           ║
-    ║              🇮🇳   M A D E   W I T H   ☀️   F O R   A D I T Y A - L 1   🇮🇳   ║
+    ║              🇮🇳   M A D E   W I T H   ☀️   F O R   A D I T Y A - L 1   🇮🇳 ║
     ║                                                                           ║
-    ║                   ISRO Spectrum Hackathon · 2024-2026                      ║
+    ║                   ISRO Hackathon · 2026                                   ║
     ║                                                                           ║
     ║         ═══════════════════════════════════════════════════════           ║
     ║                                                                           ║
