@@ -1,5 +1,8 @@
 # Python
 venv/
+.venv/
+.venv_win/
+*.whl
 __pycache__/
 *.pyc
 *.pyo

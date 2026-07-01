@@ -531,8 +531,34 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 @media (max-width: 1024px) { .premium-dash-grid { grid-template-columns: 1fr; } }
 
 .premium-dash-bottom { display: grid; grid-template-columns: 1.4fr 1fr 0.9fr; gap: 16px; }
-@media (max-width: 1024px) { .premium-dash-bottom { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 640px) { .premium-dash-bottom { grid-template-columns: 1fr; } }
+@media (min-width: 1025px) {
+  .premium-dash-bottom .dash-card {
+    height: 280px; /* Enforce uniform height on desktop */
+  }
+}
+@media (max-width: 1024px) { 
+  .premium-dash-bottom { grid-template-columns: 1fr 1fr; } 
+  .premium-dash-bottom .dash-card {
+    height: 270px; /* Enforce uniform height on tablet */
+  }
+  .premium-dash-bottom .dash-card:nth-child(3) {
+    grid-column: span 2; /* Span instrument details full-width */
+    height: auto;
+  }
+}
+@media (max-width: 640px) { 
+  .premium-dash-bottom { grid-template-columns: 1fr; } 
+  .premium-dash-bottom .dash-card {
+    height: auto;
+  }
+  .premium-dash-bottom .dash-card:nth-child(1) {
+    height: 240px; /* Stacked dial and mini trend */
+  }
+  .premium-dash-bottom .dash-card:nth-child(2) {
+    height: 300px; /* Scrollable alert log */
+  }
+}
+
 
 /* Premium slow-spin glow ring */
 .glow-ring {
@@ -1929,3 +1955,75 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     flex-wrap: wrap;
   }
 }
+
+/* ============================================
+   TCN FORECAST & MISSION STATUS
+   ============================================ */
+
+.tcn-mission-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+@media (max-width: 900px) {
+  .tcn-mission-row { grid-template-columns: 1fr; }
+}
+
+.tcn-mission-col {
+  min-width: 0;
+}
+
+.tcn-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+@media (max-width: 768px) {
+  .tcn-status-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+  .tcn-status-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.tcn-status-item {
+  background: rgba(255,255,255,0.015);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.instrument-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .instrument-grid { grid-template-columns: 1fr; }
+}
+
+.instrument-card {
+  background: rgba(255,255,255,0.015);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+/* ============================================
+   INDIA IMPACT HEATMAP
+   ============================================ */
+
+.india-map-wrapper {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.india-map-wrapper svg path {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.india-map-wrapper svg path:hover {
+  filter: brightness(1.3);
+}
+
+

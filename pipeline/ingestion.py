@@ -29,7 +29,7 @@ def read_fits_header_data(f):
             card = data[i:i+80]
             try:
                 s = card.decode('ascii', errors='replace').rstrip()
-            except:
+            except UnicodeDecodeError:
                 s = ''
             if not s.strip():
                 continue
@@ -109,15 +109,14 @@ def parse_fits_table(header, raw_bytes):
             rest = f[:-1] if f[-1] == 'A' else f
             try:
                 size = int(rest)
-            except:
+            except (ValueError, TypeError):
                 size = 1
             return size, 'string'
         elif 'A' in f:
-            # e.g. "30A"
             rest = f.split('A')[0]
             try:
                 size = int(rest)
-            except:
+            except (ValueError, TypeError):
                 size = 1
             return size, 'string'
         else:
@@ -125,7 +124,7 @@ def parse_fits_table(header, raw_bytes):
             try:
                 n = int(f)
                 return n, 'double'
-            except:
+            except (ValueError, TypeError):
                 return 8, 'double'
 
     # Handle variable-length arrays (e.g. "341J" -> 341 * 4 bytes)
@@ -136,21 +135,21 @@ def parse_fits_table(header, raw_bytes):
             try:
                 cnt = int(rest)
                 return cnt * 4, 'int32_arr', cnt
-            except:
+            except (ValueError, TypeError):
                 return 4, 'int32', 1
         elif f.endswith('D'):
             rest = f[:-1]
             try:
                 cnt = int(rest)
                 return cnt * 8, 'double_arr', cnt
-            except:
+            except (ValueError, TypeError):
                 return 8, 'double', 1
         elif f.endswith('E'):
             rest = f[:-1]
             try:
                 cnt = int(rest)
                 return cnt * 4, 'float_arr', cnt
-            except:
+            except (ValueError, TypeError):
                 return 4, 'float', 1
         elif f.endswith('K'):
             return 4, 'int32', 1
@@ -162,7 +161,7 @@ def parse_fits_table(header, raw_bytes):
             rest = f.split('A')[0]
             try:
                 size = int(rest)
-            except:
+            except (ValueError, TypeError):
                 size = 1
             return size, 'string', 1
         else:
@@ -278,8 +277,6 @@ def find_solexs_files(date_str=None):
     # Try finding SDD1 and SDD2 light curves independently (either may be missing)
     sdd1_path = None
     sdd2_path = None
-
-    # Try various extensions
     for ext in ['', '.fits']:
         s1 = os.path.join(session_dir, 'SDD1', f'AL1_SOLEXS_{date_str}_SDD1_L1.lc{ext}')
         s2 = os.path.join(session_dir, 'SDD2', f'AL1_SOLEXS_{date_str}_SDD2_L1.lc{ext}')

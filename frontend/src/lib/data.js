@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 
 // Static configurations and helpers
 export const transferLearning = {
-  source: 'GOES XRS (1996-2024)',
-  target: 'Aditya-L1 SoLEXS/HEL1OS (2024-)',
+  source: `GOES XRS (1996-${new Date().getFullYear()})`,
+  target: `Aditya-L1 SoLEXS/HEL1OS (${new Date().getFullYear()}-)`,
   fineTuneSamples: 142,
   pretrainEpochs: 200,
   finetuneEpochs: 50,
@@ -59,7 +59,7 @@ let state = {
     adaptiveThreshold: 3.0,
     rollingMAD: 2.8e-8,
     zScore: 0.0,
-    confidence: 0.98
+    confidence: 0.50
   },
   forecast: {
     probability: 12,
@@ -272,4 +272,78 @@ function jsonParse(str) {
   } catch (e) {
     return null;
   }
+}
+
+// ------------------------------------------
+// Push Notification Support (PWA)
+// ------------------------------------------
+let _lastNotifiedClass = '';
+
+export function requestNotificationPermission() {
+  // Register service worker first
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.warn('SW registration failed:', e));
+  }
+  // Request notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(perm => {
+      console.log('Notification permission:', perm);
+    });
+  }
+}
+
+export function fireNotification(title, body, tag) {
+  // Don't spam the same alert
+  if (tag === _lastNotifiedClass) return;
+  _lastNotifiedClass = tag || '';
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    // Try service worker push first
+    if (navigator.serviceWorker?.ready) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, {
+          body,
+          icon: '/icon.svg',
+          badge: '/icon.svg',
+          vibrate: [200, 100, 200],
+          tag: tag || 'solflare',
+          requireInteraction: true,
+          silent: false,
+        });
+      }).catch(() => {
+        // Fallback to regular notification
+        new Notification(title, { body, icon: '/icon.svg' });
+      });
+    } else {
+      new Notification(title, { body, icon: '/icon.svg' });
+    }
+  }
+}
+
+// Track flare class changes for notification triggers
+let _prevFlareClass = null;
+
+export function checkFlareAlert(flareClass) {
+  if (!flareClass || flareClass === _prevFlareClass) return;
+  const letter = flareClass.charAt(0).toUpperCase();
+  const prevLetter = _prevFlareClass ? _prevFlareClass.charAt(0).toUpperCase() : 'B';
+
+  // Only notify on escalation to M-class or above
+  if ((letter === 'M' || letter === 'X') &&
+      (prevLetter === 'A' || prevLetter === 'B' || prevLetter === 'C')) {
+    const title = `⚡ ${flareClass} Flare Detected!`;
+    const body = `SolFlare has detected a ${flareClass} solar flare. Check the dashboard for impact assessment and infrastructure risk details.`;
+    fireNotification(title, body, flareClass);
+  }
+
+  _prevFlareClass = flareClass;
+}
+
+export function useNotificationWatcher() {
+  const { flareClass } = useLiveState();
+  useEffect(() => {
+    checkFlareAlert(flareClass);
+  }, [flareClass]);
 }

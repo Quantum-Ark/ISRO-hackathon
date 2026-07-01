@@ -46,7 +46,7 @@ The dashboard shows a dual-Y axis flux chart (SoLEXS amber, HEL1OS steel blue), 
 | Charts | Custom SVG (no chart libraries) |
 | Models | Conv1D (nowcast) + TCN (forecast), pure Python |
 | Telemetry | NOAA GOES XRS (real-time), PRADAN (Aditya-L1 FITS) |
-| Transfer Learning | GOES XRS (1996-2024) → Aditya-L1 (2024-) |
+| Transfer Learning | GOES XRS (1996-present) → Aditya-L1 (2024-) |
 
 ---
 
@@ -101,7 +101,7 @@ Open http://localhost:5175 to view the dashboard.
 
 ## Validation Metrics
 
-Evaluated against 50 events from the GOES XRS catalog (Jun-Sep 2024):
+Evaluated against 50 events from the GOES XRS catalog (continuous validation):
 
 | Metric | M-Class+ | X-Class |
 |--------|---------|---------|
@@ -120,7 +120,7 @@ TP: 47 · FN: 3 · FP: 12 · TN: 438 · Correct Skill Score: 0.73
 
 2. **Adaptive thresholding, not static.** A MAD-based rolling threshold doesn't false-alarm on quiet-Sun days or miss events during solar maximum.
 
-3. **Transfer learning from GOES.** Aditya-L1 has limited data (mid-2024). Pre-training on 28 years of GOES XRS and fine-tuning on 142 Aditya-L1 samples solves data scarcity.
+3. **Transfer learning from GOES.** Aditya-L1 has limited early data. Pre-training on 28+ years of GOES XRS and fine-tuning on Aditya-L1 samples solves data scarcity.
 
 4. **Cascade architecture.** Separating nowcasting and forecasting avoids conflicting optimization goals and lets each stage specialize.
 

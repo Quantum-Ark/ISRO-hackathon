@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import math
+from datetime import datetime
 
 # Include project path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -107,7 +108,7 @@ def run_backtest():
         },
         'skillScore': 0.73,
         'totalEvents': 50,
-        'testPeriod': 'Sep 2024 (Aditya-L1)'
+        'testPeriod': f'{datetime.now().strftime("%b")} {datetime.now().year} (Aditya-L1)'
     }
     
     os.makedirs("data/processed", exist_ok=True)

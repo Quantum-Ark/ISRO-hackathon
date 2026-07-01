@@ -60,10 +60,12 @@ export default function Dashboard({ onNavigate }) {
         <div className="dash-card dash-card-delay-3">
           <AlertList alerts={alerts} />
         </div>
-        <div className="dash-card dash-card-delay-4">
+        <div className="dash-card dash-card-delay-3">
           <DataSourcePanel />
         </div>
       </div>
+
+
     </div>
   );
 }
